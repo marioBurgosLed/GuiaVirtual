@@ -12,17 +12,24 @@ import android.widget.Button;
 import android.widget.EditText;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
+import com.android.volley.toolbox.StringRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.note.guiavirtual.AppController;
 import com.example.note.guiavirtual.R;
+import com.example.note.guiavirtual.VolleySingleton;
 
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -104,12 +111,19 @@ public class ConsultaEquipo extends Fragment implements Response.Listener<JSONOb
             }
         });
 
+        btActualizar.setOnClickListener(new View.OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                cargarWebServiceActualizar();
+            }
+        });
+
         return vista;
     }
 
     private void cargarWebService() {
         progreso=new ProgressDialog(getContext());
-        progreso.setMessage("Cargando el web service...");
+        progreso.setMessage("Cargando datos...");
         progreso.show();
         String url="http://sigequip.esy.es/obtenerEquipoPorId.php?idEquipo="
                +etID.getText().toString();
@@ -118,7 +132,17 @@ public class ConsultaEquipo extends Fragment implements Response.Listener<JSONOb
         request.add(jsonObjectRequest);
 
     }
+    /*
+    private void cargarWebServiceActualizar() {
+        progreso = new ProgressDialog(getContext());
+        progreso.setMessage("Cargando datos...");
+        progreso.show();
+        String url = "http://http://sigequip.esy.es/actualizarEquipo.php";
 
+
+        jsonObjectRequest = new JsonObjectRequest(Request.Method.GET, url, null, this, this);
+        request.add(jsonObjectRequest);
+    }*/
 
     @Override
     public void onErrorResponse(VolleyError error) {
@@ -129,7 +153,7 @@ public class ConsultaEquipo extends Fragment implements Response.Listener<JSONOb
     @Override
     public void onResponse(JSONObject response) {
         progreso.hide();
-        Toast.makeText(getContext(),"Mensaje: "+response,Toast.LENGTH_LONG).show();
+        //Toast.makeText(getContext(),"Mensaje: "+response,Toast.LENGTH_LONG).show();
 
         Equipos miEquipo= new Equipos();
 
@@ -180,6 +204,52 @@ public class ConsultaEquipo extends Fragment implements Response.Listener<JSONOb
     public void onDetach() {
         super.onDetach();
         mListener = null;
+    }
+
+    private void cargarWebServiceActualizar() {
+        progreso=new ProgressDialog(getContext());
+        progreso.setMessage("Cargando...");
+        progreso.show();
+
+        String url="http://http://sigequip.esy.es/actualizarEquipo.php";
+
+        StringRequest stringRequest = new StringRequest(Request.Method.POST, url, new Response.Listener<String>() {
+            @Override
+            public void onResponse(String response) {
+                progreso.hide();
+
+                if (response.trim().equalsIgnoreCase("actualiza")) {
+                    Toast.makeText(getContext(), "Se ha Actualizado con exito", Toast.LENGTH_SHORT).show();
+                } else {
+                    Toast.makeText(getContext(), "No se ha Actualizado ", Toast.LENGTH_SHORT).show();
+                }
+
+            }
+        }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(getContext(), "No se ha podido conectar", Toast.LENGTH_SHORT).show();
+                progreso.hide();
+            }
+        }) {
+            @Override
+            protected Map<String, String> getParams() throws AuthFailureError {
+                String descripcion = etDescripcion.getText().toString();
+                String marca = etMarca.getText().toString();
+                String modelo = etModelo.getText().toString();
+                String serie = etSerie.getText().toString();
+
+                Map<String, String> parametros = new HashMap<>();
+                parametros.put("descripcion", descripcion);
+                parametros.put("marca", marca);
+                parametros.put("modelo", modelo);
+                parametros.put("serie", serie);
+
+                return parametros;
+            }
+        };
+        request.add(stringRequest);
+        VolleySingleton.getIntanciaVolley(getContext()).addToRequestQueue(stringRequest);
     }
 
 

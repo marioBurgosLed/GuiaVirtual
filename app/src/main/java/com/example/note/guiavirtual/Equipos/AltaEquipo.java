@@ -5,6 +5,7 @@ import android.content.Context;
 import android.net.Uri;
 import android.os.Bundle;
 import android.support.v4.app.Fragment;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -13,15 +14,22 @@ import android.widget.EditText;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import com.android.volley.ParseError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
 import com.android.volley.VolleyError;
 import com.android.volley.toolbox.JsonObjectRequest;
 import com.android.volley.toolbox.Volley;
+import com.example.note.guiavirtual.AppController;
+import com.example.note.guiavirtual.MainActivity;
 import com.example.note.guiavirtual.R;
+import com.android.volley.toolbox.JsonObjectRequest;
 
 import org.json.JSONObject;
+
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * A simple {@link Fragment} subclass.
@@ -31,15 +39,20 @@ import org.json.JSONObject;
  * Use the {@link AltaEquipo#newInstance} factory method to
  * create an instance of this fragment.
  */
-public class AltaEquipo extends Fragment implements Response.Listener<JSONObject>, Response.ErrorListener{
+public class AltaEquipo extends Fragment implements Response.Listener<JSONObject>,Response.ErrorListener{
     // TODO: Rename parameter arguments, choose names that match
     // the fragment initialization parameters, e.g. ARG_ITEM_NUMBER
     private static final String ARG_PARAM1 = "param1";
     private static final String ARG_PARAM2 = "param2";
+    //private static String TAG = MainActivity.class.getSimpleName();
+
+    //private static final String REGISTER_URL = "http://sigequip.esy.es/insertarEquipo.php";
 
     // TODO: Rename and change types of parameters
     private String mParam1;
     private String mParam2;
+
+    static final String REGISTER_URL = "http://sigequip.esy.es/InsertaEquipo2.php";
 
     private EditText descripcion, marca, modelo, serie;
     Button alta;
@@ -101,31 +114,45 @@ public class AltaEquipo extends Fragment implements Response.Listener<JSONObject
         alta.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                cargarWebService();
+                AltaRegistros();
             }
         });
 
         return vista;
     }
 
-    private void cargarWebService() {
 
-        progreso=new ProgressDialog(getContext());
-        progreso.setMessage("Cargando...");
-        progreso.show();
-        String url;
+  private void AltaRegistros() {
+        String url = "http://sigequip.esy.es/insertarEquipo2.php?Descripcion="
+                + descripcion.getText().toString()+
+                "&Marca=" + marca.getText().toString()+
+                "&Modelo=" + modelo.getText().toString() +
+                "&Serie=" + serie.getText().toString();
 
-        url="http://sigequip.esy.es/insertarEquipo.php?" +
-                "&Descripcion="+descripcion.getText().toString()+
-                "&Marca="+marca.getText().toString()+
-                "&Modelo="+modelo.getText().toString()+
-                "&Serie="+serie.getText().toString();
         url=url.replace(" ","%20");
 
-        jsonObjectRequest= new JsonObjectRequest(Request.Method.GET, url, null, this, this);
+        jsonObjectRequest=new JsonObjectRequest(Request.Method.POST, url, null,this,this);
         request.add(jsonObjectRequest);
+    }
+
+    @Override
+    public void onResponse(JSONObject response) {
+        Toast.makeText(getContext(),"Se guardó el registro...",Toast.LENGTH_LONG).show();
+        descripcion.setText("");
+        marca.setText("");
+        modelo.setText("");
+        serie.setText("");
+    }
+
+    @Override
+    public void onErrorResponse(VolleyError error) {
+        Toast.makeText(getContext(),"Se produjo un error..."+error.toString(),Toast.LENGTH_LONG).show();
 
     }
+
+
+
+
 
     // TODO: Rename method, update argument and hook method into UI event
     public void onButtonPressed(Uri uri) {
@@ -151,24 +178,7 @@ public class AltaEquipo extends Fragment implements Response.Listener<JSONObject
         mListener = null;
     }
 
-    @Override
-    public void onErrorResponse(VolleyError error) {
-        progreso.hide();
-        Toast.makeText(getContext(),"Se produjo un error... No se ha podido guardar el registro"+error.toString(),Toast.LENGTH_SHORT).show();
 
-
-    }
-
-    @Override
-    public void onResponse(JSONObject response) {
-        Toast.makeText(getContext(),"Se ha guardado el registro exitosamente",Toast.LENGTH_SHORT).show();
-        progreso.hide();
-
-        descripcion.setText("");
-        marca.setText("");
-        modelo.setText("");
-        serie.setText("");
-    }
 
     /**
      * This interface must be implemented by activities that contain this

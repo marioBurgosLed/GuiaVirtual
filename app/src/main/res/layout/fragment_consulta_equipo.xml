@@ -12,14 +12,6 @@
         android:orientation="vertical">
 
         <TextView
-            android:id="@+id/textView4"
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:gravity="center_horizontal"
-            android:text="Consulta de equipos"
-            android:textSize="18sp" />
-
-        <TextView
             android:id="@+id/textView6"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,8 +22,7 @@
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:ems="10"
-            android:inputType="textPersonName"
-            android:paddingBottom="0dp" />
+            android:inputType="textPersonName" />
 
         <TextView
             android:id="@+id/textView10"
